@@ -12,4 +12,8 @@ curl http://localhost:8080/health
 
 curl -X POST http://localhost:8080/schematron
 
+> ubl eInvoicing-EN16931 OK
 curl -s -X POST http://localhost:8080/schematron -H "Content-Type: application/xml" --data-binary @ubl-tc434-example3.xml
+
+> ubl OpenPEPPOL FAIL
+curl -s -X POST http://localhost:8080/schematron -H "Content-Type: application/xml" --data-binary @Norwegian-example-1.xml
