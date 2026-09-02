@@ -33,23 +33,22 @@ public class SchematronController {
      *         {@code {"ok": false, "messages": ["[BR-13]-..."]}}
      */
     @PostMapping(value = "/schematron", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<SchematronResult> schematron(@RequestBody byte[] xml) {
-        /*XmlSchemaValidator xsdValidator = new XmlSchemaValidator();
-        // TODO write bytes xml to file
-        XmlSchemaResult xsdResult = xsdValidator.validateSchema(
-                "data/ubl-file.xml", // Mock
-                "schema/UBL-Invoice-2.1.xsd"
-        );*/
-        SchematronResult rulesResult = schematronService.validateSchematron(xml);
-        // if (xsdResult.ok() && rulesResult.ok()) {
-        if (rulesResult.ok()) {
+    public ResponseEntity<SchematronResult> schematron(@RequestBody byte[] xmlBytes) {
+        // validate xsd:schema
+        XmlSchemaValidator xsdValidator = new XmlSchemaValidator();
+        String xsdFile = "schema/UBL-Invoice-2.1.xsd";
+        XmlSchemaResult xsdResult = xsdValidator.validateSchema(xmlBytes, xsdFile);
+        // validate rules schematron
+        SchematronResult rulesResult = schematronService.validateSchematron(xmlBytes);
+        boolean ok = xsdResult.ok() && rulesResult.ok();
+        if (ok) {
             return ResponseEntity.ok(rulesResult);
         } else {
+            // invalid BAD REQUEST
             List<String> errors = new ArrayList<String>();
-            // errors.addAll(xsdResult.messages());
+            errors.addAll(xsdResult.messages());
             errors.addAll(rulesResult.messages());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new SchematronResult(false, errors));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new SchematronResult(false, errors));
         }
     }
 

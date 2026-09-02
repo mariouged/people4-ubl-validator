@@ -24,15 +24,16 @@ public class XmlSchemaValidator {
      * @see https://docs.oasis-open.org/ubl/os-UBL-2.1/xsd/maindoc/UBL-Invoice-2.1.xsd
      */
     public XmlSchemaResult validateSchema(
-            String xmlFilePath,
-            String schemaFilePath
+        byte[] xmlBytes,
+        String schemaFilePath
     ) {
-        // inputs
-        File xmlFile = new File(xmlFilePath);
-        File xsdFile = new File(schemaFilePath);
-        XmlSchemaResult result = new XmlSchemaResult(false, Collections.emptyList());
         List<String> messages = new ArrayList<String>();
         try {
+            // inputs
+            String xmlFilePath = this.fileWrite(xmlBytes);
+            File xmlFile = new File(xmlFilePath);
+            File xsdFile = new File(schemaFilePath);
+            // validate xml with his xsd
             SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
             Schema schema = factory.newSchema(xsdFile);
             Validator validator = schema.newValidator();
@@ -43,13 +44,19 @@ public class XmlSchemaValidator {
             LOG.error("Error fatal on validator XML: " + e.getMessage());
             messages.add("Error fatal");
         }
-        if (messages.isEmpty()) {
-            // OK
-            result = new XmlSchemaResult(true, Collections.emptyList());
-        } else {
-            // FAIL
-            result = new XmlSchemaResult(false, messages);
-        }
-        return result;
+        // result
+        boolean ok = messages.isEmpty();
+        List<String> errors = ok ? Collections.emptyList() : messages;
+        return new XmlSchemaResult(ok, messages);
+    }
+
+    private String fileWrite(byte[] xmlBytes) throws IOException {
+        // TODO move resources/xml-inputs to a data file system
+        // TODO generate a tmp file name
+        String tmpFileName = "tmpSha256.xml";
+        String filePath = "xml-inputs/" + tmpFileName;
+        FileHelper helper = new FileHelper(filePath);
+        helper.write(xmlBytes);
+        return filePath;
     }
 }
