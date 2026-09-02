@@ -4,7 +4,9 @@
 
 ./gradlew test --console=plain
 
-##
+## ENDPOINTS
+
+curl http://localhost:8080/health
 
 **OK**
 ```bash
