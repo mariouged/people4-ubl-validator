@@ -1,5 +1,6 @@
 package eu.simplecompliance.ublvalidator.schematron;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -20,5 +21,11 @@ public record SchematronResult(boolean ok, List<String> messages) {
 
     public static SchematronResult invalid(List<String> messages) {
         return new SchematronResult(false, messages);
+    }
+
+    public static SchematronResult errorFatal() {
+        List<String> errors = new ArrayList<String>();
+        errors.add("500 Error Fatal");
+        return new SchematronResult(false, errors);
     }
 }

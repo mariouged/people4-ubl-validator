@@ -1,5 +1,6 @@
 package eu.simplecompliance.ublvalidator.schematron;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,44 +47,26 @@ public class SchematronService {
 
     /**
      * Validates the given XML content against the EN16931 UBL Schematron rules.
-     *
-     * @param xml the raw bytes of the XML document to validate (e.g. an UBL Invoice or CreditNote)
-     * @return the validation result: {@code ok=true} and no messages if the document complies with
-     *         all rules, otherwise {@code ok=false} and the list of violated rule messages, each
-     *         one starting with the failing rule id, e.g.
-     *         {@code [BR-13]-An Invoice shall have the Invoice total amount without VAT (BT-109).}
-     * @throws SchematronValidationException if the XML cannot be parsed/validated (e.g. it is not
-     *         well-formed XML)
+     * @link https://github.com/ConnectingEurope/eInvoicing-EN16931/blob/master/ubl/schematron/EN16931-UBL-validation.sch
      */
-    public synchronized SchematronResult validate(byte[] xml) {
+    public synchronized SchematronResult validateSchematron(byte[] xml) {
         if (xml == null || xml.length == 0) {
             throw new SchematronValidationException("The XML content to validate must not be empty");
         }
-
         final IReadableResource xmlResource = new ReadableResourceByteArray("xml-to-validate", xml);
-
         final SchematronOutputType output;
         try {
             output = schematron.applySchematronValidationToSVRL(xmlResource);
         } catch (Exception e) {
-            throw new SchematronValidationException(
-                    "Unable to validate the supplied XML: " + e.getMessage(), e);
+            throw new SchematronValidationException("Unable to validate the supplied XML: " + e.getMessage(), e);
         }
-
         if (output == null) {
-            throw new SchematronValidationException(
-                    "Unable to validate the supplied XML: it could not be parsed as XML");
+            throw new SchematronValidationException("Unable to validate the supplied XML: it could not be parsed as XML");
         }
-
         final List<String> messages = SVRLHelper.getAllFailedAssertions(output)
                 .stream()
                 .map(failedAssert -> failedAssert.getText())
                 .collect(Collectors.toList());
-
-        if (!messages.isEmpty()) {
-            LOG.debug("Schematron validation produced {} violation(s)", messages.size());
-        }
-
         return messages.isEmpty() ? SchematronResult.valid() : SchematronResult.invalid(messages);
     }
 }
