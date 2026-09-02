@@ -67,6 +67,6 @@ public class SchematronService {
                 .stream()
                 .map(failedAssert -> failedAssert.getText())
                 .collect(Collectors.toList());
-        return messages.isEmpty() ? SchematronResult.valid() : SchematronResult.invalid(messages);
+        return new SchematronResult(messages.isEmpty(), messages);
     }
 }

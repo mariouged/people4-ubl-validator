@@ -49,13 +49,13 @@ public class SchematronController {
             // errors.addAll(xsdResult.messages());
             errors.addAll(rulesResult.messages());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(SchematronResult.invalid(errors));
+                    .body(new SchematronResult(false, errors));
         }
     }
 
     @ExceptionHandler(SchematronValidationException.class)
     public ResponseEntity<SchematronResult> handleValidationError(SchematronValidationException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(SchematronResult.invalid(List.of(ex.getMessage())));
+                .body(new SchematronResult(false, List.of(ex.getMessage())));
     }
 }
